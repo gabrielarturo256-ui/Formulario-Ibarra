@@ -12,15 +12,31 @@ const db = configOK ? getFirestore(initializeApp(cfg)) : null;
 
 // ---------- Utilidades ----------
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-function shuffle(a) { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]]; } return a; }
-function show(id) { ['start', 'quiz', 'result'].forEach(s => $('#' + s).classList.toggle('hidden', s !== id)); }
+function shuffle(a) {
+    a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]]; } return a;
+}
+
+function show(id) {
+    ['start', 'quiz', 'result'].forEach(s => $('#' + s).classList.toggle('hidden', s !== id));
+}
+
+function getCodeBox() {
+    let box = document.getElementById('codebox');
+    if (!box) {
+        box = document.createElement('pre');
+        box.id = 'codebox';
+        box.className = 'codebox';
+        $('#qtext').after(box);
+    }
+    return box;
+}
 
 // Preguntas distintas por partida: muestreo aleatorio + opciones barajadas
 function buildQuiz(diff) {
     return shuffle(QUESTIONS[diff]).slice(0, DIFF[diff].n).map(q => {
         const correct = q.o[q.a];
         const opts = shuffle(q.o);
-        return { t: q.t, q: q.q, opts, a: opts.indexOf(correct), e: q.e };
+        return { t: q.t, q: q.q, c: q.c, opts, a: opts.indexOf(correct), e: q.e };
     });
 }
 
@@ -42,6 +58,9 @@ function renderQ() {
     $('#counter').textContent = `Pregunta ${s.i + 1} de ${s.qs.length} · ${DIFF[s.diff].label}`;
     $('#topic').textContent = TOPIC[q.t];
     $('#qtext').textContent = q.q;
+    const codeBox = getCodeBox();
+    codeBox.textContent = q.c || '';
+    codeBox.classList.toggle('hidden', !q.c);
     $('#opts').innerHTML = '';
     q.opts.forEach((o, k) => {
         const b = document.createElement('button');
