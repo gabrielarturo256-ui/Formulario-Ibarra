@@ -1,9 +1,3 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-analytics.js";
-
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyBByYrudBuW2kKHcp0_xaWRD6GGfWHPPzk",
   authDomain: "formulario-apex.firebaseapp.com",
@@ -15,6 +9,8 @@ const firebaseConfig = {
   measurementId: "G-HTCGQVQ59Y"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+
+//no se usa pero para que git lea cambios
+function smn(){
+  return null;
+}
