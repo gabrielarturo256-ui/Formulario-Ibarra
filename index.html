@@ -1,15 +1,78 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
+
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Quiz de Bases de Datos</title>
     <link rel="stylesheet" href="styles.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulario</title>
 </head>
+
 <body>
-   asdasdasasda
+    <div class="wrap">
+        <h1>🧠 Quiz de Bases de Datos</h1>
+        <p class="msg">Normalización · Tipos de claves · QuickSQL</p>
 
+        <section id="start" class="card">
+            <div class="row">
+                <input id="name" placeholder="Tu nombre (máx. 20)" maxlength="20">
+                <select id="diff">
+                    <option value="easy">Fácil</option>
+                    <option value="normal">Normal</option>
+                    <option value="hard">Difícil</option>
+                </select>
+                <button id="go">Empezar</button>
+            </div>
+            <p class="msg">Cada partida toma 15 preguntas al azar del nivel elegido y las opciones salen en orden
+                distinto.</p>
+        </section>
 
+        <section id="quiz" class="card hidden">
+            <div class="row" style="justify-content:space-between">
+                <span id="counter" class="msg"></span><span id="topic" class="tag"></span>
+            </div>
+            <div class="progress" style="margin:10px 0 16px">
+                <div id="prog"></div>
+            </div>
+            <h2 id="qtext" style="font-size:1.2rem"></h2>
+            <div id="opts"></div>
+            <div id="expl" class="expl hidden"></div>
+            <div class="row" style="margin-top:14px"><button id="next" class="hidden">Siguiente →</button></div>
+        </section>
 
+        <section id="result" class="card hidden">
+            <h2>Resultado de <span id="who"></span></h2>
+            <p id="final" style="font-size:1.6rem;font-weight:700"></p>
+            <p id="save" class="msg"></p>
+            <h3>Repaso</h3>
+            <div id="review"></div>
+            <div class="row" style="margin-top:12px"><button id="again">Jugar otra vez</button></div>
+        </section>
+
+        <section class="card">
+            <h2>🏆 Ranking global</h2>
+            <div class="row" id="tabs">
+                <button class="ghost" data-d="easy">Fácil</button>
+                <button class="ghost" data-d="normal">Normal</button>
+                <button class="ghost" data-d="hard">Difícil</button>
+            </div>
+            <table style="margin-top:10px">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Jugador</th>
+                        <th>Puntos</th>
+                    </tr>
+                </thead>
+                <tbody id="board"></tbody>
+            </table>
+        </section>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script src="questions.js"></script>
+    <!-- type="module" es obligatorio: quiz-logic.js usa "import" de Firebase -->
+    <script type="module" src="quiz-logic.js"></script>
 </body>
+
 </html>
