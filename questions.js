@@ -1,194 +1,335 @@
-// Banco de preguntas por dificultad.
-// t: tema (norm | keys | qs), q: pregunta, o: opciones, a: índice de la correcta, e: explicación.
-// Para agregar preguntas, solo añade objetos a la lista de la dificultad.
-// Cada partida toma 5 al azar y baraja las opciones.
+// Banco de preguntas por dificultad (20 por nivel).
+// t: tema (norm | keys | qs)
+// q: pregunta · o: opciones · a: índice de la correcta · e: explicación
+// c: (opcional) esquema o ejemplo que se muestra en un recuadro (solo algunas preguntas)
+// Cada partida toma 15 al azar y baraja las opciones.
 
 const QUESTIONS = {
   easy: [
-    { t:'norm', q:'¿Cuál es el objetivo principal de la normalización?',
-      o:['Aumentar la redundancia de datos','Reducir redundancia y anomalías','Eliminar todas las tablas','Cifrar los datos'], a:1,
-      e:'Reduce datos repetidos y evita anomalías al insertar, actualizar o borrar.' },
-    { t:'keys', q:'¿Qué es una clave primaria (PK)?',
-      o:['Campo que identifica de forma única cada fila y no admite nulos','Campo que apunta a otra tabla','Campo opcional que puede repetirse','Un índice de texto'], a:0,
-      e:'La PK identifica cada fila de forma única y no puede ser nula.' },
-    { t:'keys', q:'¿Qué es una clave foránea (FK)?',
-      o:['Columna que referencia la PK de otra tabla','Columna que nunca se repite','Clave de cifrado','El nombre de la tabla'], a:0,
-      e:'Una FK enlaza tablas y mantiene la integridad referencial.' },
-    { t:'keys', q:'¿Qué es una clave natural?',
-      o:['Un valor generado automáticamente por el sistema','Un valor del mundo real, como el CURP o el correo','Siempre es numérica','Exclusiva de tablas temporales'], a:1,
-      e:'Una clave natural tiene significado fuera de la base de datos.' },
-    { t:'keys', q:'¿Qué es una clave ID o surrogada?',
-      o:['Un número artificial sin significado de negocio','El nombre del cliente','El correo electrónico','El RFC'], a:0,
-      e:'Un ID surrogado (autoincremental o UUID) es estable y no cambia aunque cambien los datos reales.' },
-    { t:'qs', q:'En QuickSQL, ¿qué indica la palabra pk junto a una columna?',
-      o:['Que la columna es de texto','Que la columna es clave primaria','Que la columna es opcional','Que la columna es una vista'], a:1,
-      e:'En QuickSQL, pk marca la clave primaria de la tabla.' },
-    { t:'norm', q:'Una tabla está en 1FN cuando:',
-      o:['Tiene valores atómicos, sin listas dentro de una celda','Tiene una PK compuesta','No tiene índices','Tiene al menos 10 columnas'], a:0,
-      e:'1FN exige que cada celda contenga un solo valor y no existan grupos repetidos.' },
-    { t:'keys', q:'¿Cuál es un buen ejemplo de clave natural?',
-      o:['id_usuario autoincremental','El CURP','Un UUID','Un contador de filas'], a:1,
-      e:'El CURP existe en el mundo real; los demás son valores generados por el sistema.' },
-    { t:'norm', q:'¿Qué es una anomalía de actualización?',
-      o:['Un error al cambiar un dato repetido en varias filas y dejar valores inconsistentes','Un error al crear la base de datos','Una fila sin columnas','Un índice duplicado'], a:0,
-      e:'Si un dato está repetido, hay que cambiarlo en todos lados; si no, quedan inconsistencias.' },
-    { t:'norm', q:'¿Qué es una anomalía de borrado?',
-      o:['Perder información no relacionada al borrar una fila','Borrar la base completa','Borrar un índice','Cambiar el tipo de un dato'], a:0,
-      e:'Al borrar una fila se pierde otro dato que solo estaba guardado ahí.' },
-    { t:'norm', q:'¿Por qué conviene guardar los clientes en su propia tabla en vez de repetir sus datos en cada pedido?',
-      o:['Para evitar repetir datos y poder actualizarlos en un solo lugar','Porque las tablas no admiten texto','Porque así no hace falta PK','Porque reduce el número de columnas a cero'], a:0,
-      e:'Separar entidades evita repetir datos y facilita mantenerlos.' },
-    { t:'norm', q:'¿Qué tipo de valor viola la 1FN si aparece en una celda?',
-      o:['Un número entero','Una lista de varios teléfonos separados por comas','Una fecha','Un booleano'], a:1,
-      e:'Cada celda debe contener un solo valor.' },
-    { t:'keys', q:'¿Qué es una clave compuesta?',
-      o:['Una clave formada por dos o más columnas','Una clave que se repite en todas las tablas','Una clave cifrada','Una clave de un solo carácter'], a:0,
-      e:'Su combinación de columnas identifica cada fila.' },
-    { t:'keys', q:'¿Puede una clave foránea contener valores nulos?',
-      o:['Sí, siempre','Sí, si la relación es opcional','No, nunca bajo ninguna circunstancia','Solo en tablas temporales'], a:1,
-      e:'Si la relación es opcional, la FK puede quedar vacía; si es obligatoria, no.' },
-    { t:'keys', q:'¿Qué ventaja tiene un ID autoincremental como PK?',
-      o:['Es estable y no depende de datos que puedan cambiar','Ocupa más espacio que cualquier otra clave','Impide las relaciones','Solo sirve para textos'], a:0,
-      e:'Como no depende de datos reales, no necesita cambiar si estos se modifican.' },
-    { t:'keys', q:'¿Qué es la integridad referencial?',
-      o:['Que una FK solo apunte a valores existentes en la tabla padre','Que todas las tablas tengan el mismo número de filas','Que no existan claves naturales','Que los datos estén cifrados'], a:0,
-      e:'La base de datos impide referencias a registros que no existen.' },
-    { t:'keys', q:'¿Qué es un UUID?',
-      o:['Un identificador único generado de forma aleatoria','Un tipo de índice','Un nombre de usuario','Un lenguaje de consulta'], a:0,
-      e:'Es un identificador de 128 bits muy improbable de repetirse.' },
-    { t:'qs', q:'En QuickSQL, ¿qué hace el símbolo -- debajo del nombre de la tabla?',
-      o:['Separa el nombre de la tabla de sus columnas','Elimina la tabla','Crea una vista','Indica un tipo de dato'], a:0,
-      e:'Marca el inicio de la lista de columnas.' },
-    { t:'qs', q:'En QuickSQL, ¿qué significa int junto a una columna?',
-      o:['Que es un tipo de dato entero','Que es un índice','Que la columna es interna','Que es opcional'], a:0,
-      e:'int indica que la columna guarda números enteros.' },
-    { t:'norm', q:'¿Cuál es la diferencia principal entre 1FN y 2FN?',
-      o:['La 2FN exige que los atributos dependan de toda la PK, no solo de una parte','La 1FN exige claves foráneas','No hay diferencia','La 2FN elimina la PK'], a:0,
-      e:'1FN trata los valores de las celdas; 2FN trata la dependencia respecto a la clave completa.' }
+    { t: 'norm', q: '¿Para qué sirve normalizar una base de datos?',
+      o: ['Para tener más datos repetidos', 'Para evitar datos repetidos y errores al cambiar o borrar', 'Para borrar tablas', 'Para cifrar contraseñas'], a: 1,
+      e: 'Si cada dato se guarda una sola vez, es más fácil mantenerlo correcto.' },
+
+    { t: 'keys', q: '¿Qué es la clave primaria (PK) de una tabla?',
+      o: ['La columna que identifica cada fila y no se repite ni queda vacía', 'La columna que enlaza con otra tabla', 'La columna que puede quedar vacía', 'El nombre de la tabla'], a: 0,
+      e: 'Es el identificador único de cada fila.',
+      c: `CREATE TABLE usuarios (
+  id INT PRIMARY KEY,
+  nombre VARCHAR(50)
+);` },
+
+    { t: 'keys', q: 'En la tabla pedidos, la columna cliente_id guarda el número de un cliente de la tabla clientes. ¿Qué tipo de columna es?',
+      o: ['Clave primaria', 'Clave foránea (FK): apunta a un registro de otra tabla', 'Clave natural', 'Un índice'], a: 1,
+      e: 'Una FK conecta una fila con un registro de otra tabla.',
+      c: `CREATE TABLE pedidos (
+  id INT PRIMARY KEY,
+  cliente_id INT REFERENCES clientes(id)
+);` },
+
+    { t: 'keys', q: '¿Qué es una clave natural?',
+      o: ['Un número que inventa el sistema', 'Un dato real que ya identifica algo, como el CURP', 'Un dato que siempre es número', 'Un dato temporal'], a: 1,
+      e: 'Es un dato del mundo real, como el CURP o el correo.' },
+
+    { t: 'keys', q: '¿Qué es un ID autoincremental?',
+      o: ['Un número que se crea solo, sin significado real', 'El nombre de la persona', 'Su correo electrónico', 'Su RFC'], a: 0,
+      e: 'El sistema le asigna 1, 2, 3… y no depende de datos personales.' },
+
+    { t: 'qs', q: 'En QuickSQL, ¿qué significa pk junto a una columna?',
+      o: ['Que la columna es de texto', 'Que es la clave primaria', 'Que puede quedar vacía', 'Que es una vista'], a: 1,
+      e: 'pk marca la clave primaria.',
+      c: `usuarios
+--
+id int pk
+nombre varchar` },
+
+    { t: 'norm', q: 'Una celda con varios teléfonos separados por comas, ¿está bien en una base normalizada?',
+      o: ['Sí, es lo más práctico', 'No, cada celda debe tener un solo valor', 'Sí, si son menos de 3', 'No se pueden guardar teléfonos'], a: 1,
+      e: 'Cada teléfono debería ir en su propia fila.',
+      c: `id | nombre | telefonos
+1  | Ana    | 555-1234, 555-9876   ← varios valores en una celda` },
+
+    { t: 'norm', q: 'En una tabla de pedidos, si cambias el nombre de un cliente en una fila pero no en las demás, ¿qué problema aparece?',
+      o: ['Datos inconsistentes: la misma persona aparece con dos nombres', 'La tabla se borra sola', 'Se crean más pedidos', 'Ningún problema'], a: 0,
+      e: 'Cuando un dato está repetido, hay que cambiarlo en todos lados.',
+      c: `pedido | cliente | ciudad
+1      | Ana     | Culiacán
+2      | Ana     | Mazatlán   ← misma persona, dos ciudades` },
+
+    { t: 'norm', q: '¿Qué ganas al guardar los clientes en su propia tabla?',
+      o: ['Cambiar sus datos en un solo lugar', 'Repetir sus datos en cada pedido', 'No tener clave primaria', 'Que la base sea más lenta'], a: 0,
+      e: 'Los datos del cliente se actualizan una vez y todos los pedidos lo ven.' },
+
+    { t: 'norm', q: '¿Cómo se llama la primera regla de normalización, la de un solo valor por celda?',
+      o: ['1FN (primera forma normal)', '2FN', '3FN', 'Ninguna'], a: 0,
+      e: 'La 1FN pide que cada celda tenga un solo valor.' },
+
+    { t: 'keys', q: '¿Por qué un ID es buena clave para una tabla de usuarios?',
+      o: ['Porque no cambia aunque cambien sus datos personales', 'Porque es la más larga', 'Porque ocupa más espacio', 'Porque sirve para cifrar'], a: 0,
+      e: 'Como no depende de datos personales, no hay que cambiarlo.' },
+
+    { t: 'keys', q: '¿Qué garantiza una clave foránea?',
+      o: ['Que el valor exista en la tabla a la que apunta', 'Que la tabla tenga 10 filas', 'Que los datos estén cifrados', 'Que no haya ningún dato vacío'], a: 0,
+      e: 'Así no se puede guardar un cliente_id que no exista.' },
+
+    { t: 'keys', q: '¿Qué es un UUID?',
+      o: ['Un código aleatorio casi imposible de repetir', 'Un tipo de índice', 'Un nombre de usuario', 'Un lenguaje de consulta'], a: 0,
+      e: 'Es un identificador largo generado al azar.' },
+
+    { t: 'norm', q: 'Un dato "atómico" es un dato que:',
+      o: ['No se puede dividir en partes más pequeñas útiles', 'Es muy pequeño', 'Está cifrado', 'Aparece en dos tablas'], a: 0,
+      e: 'Por ejemplo, la ciudad es atómica; "Culiacán, Sinaloa" no lo es.' },
+
+    { t: 'keys', q: 'Si un alumno puede inscribirse en varios cursos, ¿qué se necesita para identificar cada inscripción?',
+      o: ['Solo el nombre del alumno', 'Juntar alumno y curso como clave', 'Solo la fecha', 'Nada, no hace falta'], a: 1,
+      e: 'La pareja alumno + curso es única para cada inscripción.' },
+
+    { t: 'qs', q: 'En QuickSQL, ¿qué separa el nombre de la tabla de sus columnas?',
+      o: ['--', 'pk', 'int', '>-'], a: 0,
+      e: 'La línea de guiones (--) separa el nombre de las columnas.',
+      c: `usuarios
+--
+id int pk` },
+
+    { t: 'norm', q: '¿Qué es una relación uno a muchos?',
+      o: ['Un registro de una tabla se relaciona con varios de otra', 'Dos tablas idénticas', 'Una tabla sin claves', 'Un dato repetido en una sola fila'], a: 0,
+      e: 'Por ejemplo, un cliente puede tener muchos pedidos.' },
+
+    { t: 'keys', q: '¿Puede una clave foránea quedar vacía?',
+      o: ['Sí, si la relación es opcional', 'Nunca', 'Siempre', 'Solo en QuickSQL'], a: 0,
+      e: 'Depende de si la relación es obligatoria o no.' },
+
+    { t: 'norm', q: 'Una tabla ya tiene un solo valor por celda (1FN). ¿Qué regla le falta para llegar a 2FN?',
+      o: ['Que cada dato dependa de toda la clave, no solo de una parte', 'Que tenga clave foránea', 'Que no tenga nulos', 'Que tenga más de 10 columnas'], a: 0,
+      e: 'La 2FN cuida que cada dato pertenezca a la clave completa.' },
+
+    { t: 'keys', q: '¿Qué pasa si una clave natural cambia, por ejemplo un correo?',
+      o: ['Hay que actualizarla en todas las tablas que la usan', 'No pasa nada', 'La tabla se borra', 'Se convierte en ID automáticamente'], a: 0,
+      e: 'Por eso se prefiere una clave que no cambie.' }
   ],
+
   normal: [
-    { t:'norm', q:'Una tabla está en 2FN cuando:',
-      o:['Está en 1FN y ningún atributo depende solo de una parte de la PK','No tiene claves foráneas','Usa solo claves naturales','Está desnormalizada a propósito'], a:0,
-      e:'La 2FN elimina dependencias parciales; solo importa cuando la PK es compuesta.' },
-    { t:'norm', q:'¿Qué es una dependencia transitiva?',
-      o:['A → B y B → C, por lo que A → C, con C no clave','A depende de sí misma','La tabla tiene dos PK','La columna contiene nulos'], a:0,
-      e:'Un atributo no clave depende de otro atributo no clave.' },
-    { t:'norm', q:'La 3FN elimina principalmente:',
-      o:['Dependencias parciales','Dependencias transitivas','Valores nulos','Claves foráneas'], a:1,
-      e:'La 3FN exige que los atributos no clave dependan solo de la PK.' },
-    { t:'keys', q:'En inscripciones(alumno_id, curso_id, fecha), ¿cuál es la PK correcta?',
-      o:['fecha','alumno_id y curso_id juntas','Solo alumno_id','No debe tener PK'], a:1,
-      e:'Un alumno puede inscribirse en varios cursos; la combinación identifica cada inscripción.' },
-    { t:'keys', q:'En pedidos, la columna cliente_id que referencia clientes.id es:',
-      o:['Una PK','Una FK','Una clave natural','Un índice único'], a:1,
-      e:'Referencia la PK de otra tabla, por eso es una FK.' },
-    { t:'keys', q:'¿Por qué suele evitarse usar el correo como PK de usuarios?',
-      o:['Nunca se puede usar como clave','Si cambia, hay que actualizar todas las referencias; por eso se prefiere un ID','Es siempre la mejor opción','Se convierte en FK automáticamente'], a:1,
-      e:'Una clave natural que cambia genera cascadas de actualizaciones; un ID estable evita ese problema.' },
-    { t:'qs', q:'¿Cómo se declara en QuickSQL que user_id es FK hacia users.id?',
-      o:['user_id int ref users','user_id int fk >- users.id','FOREIGN users user_id','user_id -> users'], a:1,
-      e:'Se usa fk junto con el símbolo de relación y la columna destino.' },
-    { t:'norm', q:'Una tabla está en BCNF cuando:',
-      o:['Todo determinante es una superclave','No tiene claves foráneas','No tiene valores nulos','Tiene una sola columna'], a:0,
-      e:'BCNF es una versión más estricta de la 3FN: cada dependencia funcional parte de una superclave.' },
-    { t:'norm', q:'¿Qué forma normal elimina las dependencias transitivas?',
-      o:['1FN','2FN','3FN','Ninguna'], a:2,
-      e:'La 3FN exige que los atributos no clave dependan solo de la PK.' },
-    { t:'norm', q:'Una tabla está en 3FN pero tiene un determinante que no es superclave. ¿Qué ocurre?',
-      o:['Cumple BCNF','No cumple BCNF','Cumple solo 1FN','No cumple 1FN'], a:1,
-      e:'BCNF exige que todo determinante sea superclave; la 3FN permite excepciones.' },
-    { t:'norm', q:'En matrículas(alumno_id, materia_id, profesor_id) con PK (alumno_id, materia_id) y materia_id → profesor_id. ¿Qué forma normal se viola?',
-      o:['2FN, por dependencia parcial de profesor_id respecto a la PK','1FN, porque hay tres columnas','Ninguna','La PK no es válida'], a:0,
-      e:'materia_id es parte de la PK y determina profesor_id: eso es una dependencia parcial.' },
-    { t:'norm', q:'Una tabla contiene (id_pedido, producto, nombre_cliente, ciudad_cliente), con PK id_pedido y nombre_cliente → ciudad_cliente. ¿Qué forma normal se viola?',
-      o:['3FN, por dependencia transitiva a través de nombre_cliente','1FN','2FN, porque la PK tiene una sola columna','Ninguna'], a:0,
-      e:'nombre_cliente no es clave, pero determina la ciudad: eso es transitiva.' },
-    { t:'norm', q:'¿Qué se busca al dividir una tabla grande en varias relacionadas?',
-      o:['Reducir redundancia y mantener integridad','Aumentar los duplicados','Eliminar las FK','Ocultar datos'], a:0,
-      e:'Cada hecho se guarda una sola vez y se relaciona por claves.' },
-    { t:'keys', q:'¿Qué es una clave alterna (alternate key)?',
-      o:['Una clave candidata que no se eligió como PK','Una FK','Un índice agrupado','Una clave nula'], a:0,
-      e:'Es otra forma de identificar filas, pero no es la PK.' },
-    { t:'keys', q:'¿Qué garantiza una restricción UNIQUE?',
-      o:['Que no se repitan valores en esa columna o combinación','Que la columna sea PK','Que la columna sea FK','Que no admita nulos nunca'], a:0,
-      e:'UNIQUE evita duplicados, pero no convierte la columna en PK.' },
-    { t:'keys', q:'¿Qué es una FK compuesta?',
-      o:['Una FK formada por varias columnas que referencian una PK compuesta','Una FK que apunta a dos tablas a la vez','Una FK sin PK','Una FK cifrada'], a:0,
-      e:'Las columnas de la FK deben coincidir con las de la PK referenciada.' },
-    { t:'keys', q:'¿Qué buena práctica se sigue al nombrar una FK?',
-      o:['Usar el nombre de la tabla padre seguido de _id, como cliente_id','Usar nombres aleatorios','Repetir la misma FK en todas las tablas','Usar solo números'], a:0,
-      e:'Un nombre claro indica de un vistazo a qué tabla apunta.' },
-    { t:'keys', q:'¿Qué problema tiene una clave natural compuesta por nombre + fecha de nacimiento?',
-      o:['No garantiza unicidad si dos personas comparten ambos datos','No admite texto','Impide crear índices','Es siempre nula'], a:0,
-      e:'Dos personas pueden coincidir en ambos datos; por eso se prefiere un ID.' },
-    { t:'qs', q:'En QuickSQL, ¿qué hace la sintaxis user_id int fk >- users.id?',
-      o:['Declara una FK hacia users.id con relación de muchos a uno','Borra la tabla users','Crea un índice en users','Renombra la columna id'], a:0,
-      e:'La columna del lado de la flecha es la que muchas veces apunta a un solo registro.' },
-    { t:'qs', q:'En QuickSQL, ¿qué expresa la cardinalidad de una relación?',
-      o:['Cuántas filas de una tabla pueden relacionarse con cuántas de la otra','El tamaño del archivo','El número de columnas','El tipo de índice'], a:0,
-      e:'Indica si la relación es uno a uno, uno a muchos o muchos a muchos.' }
+    { t: 'norm', q: 'En una tabla de inscripciones (alumno, curso, profesor), el profesor depende solo del curso. ¿Qué problema hay?',
+      o: ['Dependencia parcial: no cumple 2FN', 'Tiene demasiadas columnas', 'Está bien así', 'Le falta una clave'], a: 0,
+      e: 'El profesor depende solo de una parte de la clave, así que conviene sacarlo a una tabla de cursos.',
+      c: `inscripciones
+alumno | curso | profesor
+Ana    | Math  | Ruiz
+Luis   | Math  | Ruiz     ← el profesor depende solo del curso` },
+
+    { t: 'norm', q: 'En una tabla de pedidos, la ciudad depende del cliente y no del pedido. ¿Qué forma normal se rompe?',
+      o: ['3FN, por dependencia transitiva', '1FN', '2FN', 'BCNF no aplica'], a: 0,
+      e: 'La ciudad depende de otro dato que no es la clave: eso es una dependencia transitiva.',
+      c: `pedido | cliente | ciudad
+1      | Ana     | Culiacán
+2      | Ana     | Culiacán   ← la ciudad depende del cliente` },
+
+    { t: 'norm', q: '¿Qué forma normal elimina las dependencias transitivas?',
+      o: ['1FN', '2FN', '3FN', 'Ninguna'], a: 2,
+      e: 'La 3FN exige que los datos dependan directamente de la clave.' },
+
+    { t: 'norm', q: 'Una tabla está en 3FN, pero una columna que no es clave determina a otra. ¿Hay problema?',
+      o: ['Sí, no cumple BCNF', 'No, está perfecta', 'Le falta la 1FN', 'Le sobra una clave primaria'], a: 0,
+      e: 'BCNF es más estricta: cada dependencia debe partir de una superclave.' },
+
+    { t: 'keys', q: '¿Qué pasa si el correo de un usuario es su clave primaria y el usuario lo cambia?',
+      o: ['Hay que actualizarlo en todas las tablas que lo usan', 'No pasa nada', 'La tabla se borra', 'Se convierte en ID'], a: 0,
+      e: 'Por eso se prefiere un ID que no cambie.' },
+
+    { t: 'keys', q: '¿Cómo se llama una clave que identifica filas pero no fue elegida como PK?',
+      o: ['Clave alterna (candidata no elegida)', 'Clave foránea', 'Índice agrupado', 'Clave nula'], a: 0,
+      e: 'Puede haber varias claves candidatas; solo una es la PK.' },
+
+    { t: 'keys', q: '¿Qué garantiza UNIQUE en una columna?',
+      o: ['Que no se repitan valores', 'Que sea la clave primaria', 'Que sea una clave foránea', 'Que nunca tenga vacíos'], a: 0,
+      e: 'UNIQUE evita duplicados sin convertir la columna en PK.',
+      c: `CREATE TABLE usuarios (
+  id INT PRIMARY KEY,
+  email VARCHAR(100) UNIQUE
+);` },
+
+    { t: 'keys', q: 'Una clave formada por dos columnas, ¿cómo se llama?',
+      o: ['Clave compuesta', 'Clave foránea', 'Clave natural', 'Clave cifrada'], a: 0,
+      e: 'Se forma combinando dos o más columnas.' },
+
+    { t: 'keys', q: '¿Qué problema tiene usar nombre + fecha de nacimiento como clave?',
+      o: ['Dos personas pueden coincidir en ambos datos', 'Son muy largos', 'No se pueden guardar', 'Son números'], a: 0,
+      e: 'Dos personas pueden tener el mismo nombre y fecha de nacimiento.' },
+
+    { t: 'keys', q: '¿Por qué conviene nombrar una FK como cliente_id?',
+      o: ['Para saber de un vistazo a qué tabla apunta', 'Porque es obligatorio', 'Para cifrarla', 'Para que sea más corta'], a: 0,
+      e: 'Un buen nombre hace el diseño más fácil de leer.' },
+
+    { t: 'qs', q: 'En QuickSQL, ¿cómo se indica que user_id apunta a users.id?',
+      o: ['user_id int fk >- users.id', 'user_id int ref users', 'FOREIGN users user_id', 'user_id -> users'], a: 0,
+      e: 'Se usa fk junto con el símbolo de relación y la columna destino.',
+      c: `users
+--
+id int pk
+
+posts
+--
+id int pk
+user_id int` },
+
+    { t: 'norm', q: '¿Por qué dividir una tabla grande en varias relacionadas?',
+      o: ['Para guardar cada dato una vez y mantenerlo fácil', 'Para repetir datos', 'Para quitar las claves', 'Para ocultar información'], a: 0,
+      e: 'Cada tipo de información tiene su propia tabla.' },
+
+    { t: 'norm', q: 'Un valor calculado, como total = cantidad × precio, ¿conviene guardarlo en la tabla?',
+      o: ['Normalmente no; se puede calcular cuando se necesita', 'Siempre es obligatorio', 'Viola la 1FN', 'Es una clave primaria'], a: 0,
+      e: 'Guardarlo puede hacer que quede desactualizado si cambian los datos base.' },
+
+    { t: 'keys', q: 'Si una tabla usa como clave un UUID generado en el celular, ¿qué problema puede dar?',
+      o: ['Índices más grandes y menos ordenados', 'No funciona en ningún motor', 'Impide las FK', 'Obliga a usar números negativos'], a: 0,
+      e: 'Los valores aleatorios hacen el índice más pesado de mantener.' },
+
+    { t: 'norm', q: '¿Qué es una descomposición sin pérdida?',
+      o: ['Al volver a unir las tablas se recupera toda la información', 'Se pierde espacio en disco', 'Se borran los duplicados', 'No hay FK'], a: 0,
+      e: 'Separar y volver a unir no debe cambiar los datos originales.' },
+
+    { t: 'qs', q: 'En QuickSQL, ¿qué significa la cardinalidad de una relación?',
+      o: ['Cuántos registros de una tabla se relacionan con cuántos de la otra', 'El tamaño del archivo', 'El número de columnas', 'El tipo de índice'], a: 0,
+      e: 'Indica si la relación es uno a uno, uno a muchos o muchos a muchos.' },
+
+    { t: 'keys', q: '¿Qué necesita una FK compuesta?',
+      o: ['Varias columnas que coinciden con la clave compuesta de la otra tabla', 'Dos tablas a la vez', 'Ser cifrada', 'Ningún requisito'], a: 0,
+      e: 'Las columnas deben coincidir en orden y tipo con la clave que referencian.',
+      c: `detalle_pedido
+pedido_id | linea_id   → debe coincidir con
+lineas(pedido_id, linea_id)` },
+
+    { t: 'norm', q: '¿Qué problema trae guardar el mismo dato en muchas filas?',
+      o: ['Anomalías: al cambiarlo en una parte puede quedar distinto en otra', 'Ocupa menos espacio', 'Siempre mejora la velocidad', 'No trae problemas'], a: 0,
+      e: 'Es la causa de los errores de actualización.' },
+
+    { t: 'keys', q: '¿Qué es una relación muchos a muchos?',
+      o: ['Muchos registros de una tabla se relacionan con muchos de otra, y se usa una tabla intermedia', 'Dos tablas idénticas', 'Una tabla sin claves', 'Un dato repetido'], a: 0,
+      e: 'Por ejemplo, estudiantes y cursos se unen con una tabla de inscripciones.',
+      c: `estudiantes ──┐
+              inscripciones (estudiante_id, curso_id)
+cursos ───────┘` },
+
+    { t: 'norm', q: '¿Qué forma normal exige que todo determinante sea superclave?',
+      o: ['BCNF', '1FN', '2FN', 'Ninguna'], a: 0,
+      e: 'BCNF es la versión más estricta de la 3FN.' }
   ],
+
   hard: [
-    { t:'norm', q:'La tabla ventas(producto_id [PK], proveedor, pais_proveedor) cumple que proveedor determina pais_proveedor. ¿Qué forma normal se viola?',
-      o:['La 1FN, porque hay listas en una celda','La 3FN, por la dependencia transitiva producto → proveedor → país','La 2FN, porque la PK tiene una sola columna','No se viola ninguna'], a:1,
-      e:'Como proveedor no es clave pero determina el país, hay una transitiva. También se viola la BCNF.' },
-    { t:'norm', q:'En BCNF, para toda dependencia funcional no trivial X → Y, X debe ser:',
-      o:['Una clave foránea','Una superclave','Un atributo nulo','Un índice'], a:1,
-      e:'Toda dependencia debe partir de una superclave.' },
-    { t:'norm', q:'Una tabla tiene PK (A, B) y la dependencia B → C, con C no clave. ¿Qué ocurre?',
-      o:['Se viola la 2FN por una dependencia parcial','Está en 2FN pero no en 3FN','Está en BCNF','Es válida sin cambios'], a:0,
-      e:'C depende solo de B, que es parte de la PK compuesta.' },
-    { t:'keys', q:'Una clave candidata es:',
-      o:['Cualquier FK de la tabla','Un conjunto mínimo de atributos que identifica cada fila; una se elige como PK','Solo las columnas que admiten nulos','Un índice agrupado'], a:1,
-      e:'Puede haber varias candidatas; la PK es la que se elige entre ellas.' },
-    { t:'keys', q:'¿Por qué una PK compuesta puede complicar las FK de otras tablas?',
-      o:['Obliga a copiar varias columnas en cada tabla hija','El motor no la permite','Ocupa menos espacio','Impide crear índices'], a:0,
-      e:'Cada tabla hija debe repetir todas las columnas de la clave compuesta.' },
-    { t:'keys', q:'Tabla pagos con id autoincremental y CURP único. ¿Qué diseño es correcto?',
-      o:['id como PK y CURP como clave candidata con restricción UNIQUE','CURP como PK sin UNIQUE','Eliminar ambos campos','CURP como FK hacia la misma tabla'], a:0,
-      e:'Un ID estable como PK y el CURP como única restricción de unicidad.' },
-    { t:'qs', q:'En QuickSQL, ¿cómo se define una tabla?',
-      o:['Con el nombre, una línea de guiones -- y luego las columnas','Con CREATE TABLE nombre','Con las etiquetas <table> y </table>','Con nombre: { }'], a:0,
-      e:'Primero va el nombre de la tabla, después -- y debajo cada columna con su tipo.' },
-    { t:'qs', q:'Al procesar un diagrama en QuickSQL, ¿qué obtienes normalmente?',
-      o:['Un diagrama entidad-relación y el script SQL de creación de tablas','Solo datos de prueba','Una API REST','Un informe en PDF de ventas'], a:0,
-      e:'QuickSQL dibuja el modelo y puede generar el SQL correspondiente.' },
-    { t:'norm', q:'Una tabla tiene PK (A, B, C) y la dependencia A → D. ¿Qué forma normal se viola?',
-      o:['2FN, por dependencia parcial','1FN','3FN, por transitiva','BCNF no aplica'], a:0,
-      e:'A es solo parte de la PK compuesta, así que D depende parcialmente de la clave.' },
-    { t:'norm', q:'Un esquema está en 3FN pero no en BCNF. ¿Qué lo caracteriza?',
-      o:['Existe una dependencia cuyo determinante no es superclave, pero el atributo dependiente es parte de una clave','Tiene valores nulos','Tiene claves foráneas','Tiene una PK simple'], a:0,
-      e:'La 3FN tolera este caso porque el atributo dependiente es primo (forma parte de una clave candidata).' },
-    { t:'norm', q:'Una descomposición sin pérdida (lossless) significa que:',
-      o:['Al volver a unir las tablas con JOIN se recuperan los datos originales','No se pierde espacio en disco','Se eliminan los duplicados','No hay FK'], a:0,
-      e:'Ninguna información se pierde al separar y volver a unir.' },
-    { t:'norm', q:'Una descomposición que no preserva dependencias puede:',
-      o:['Dificultar verificar algunas reglas sin hacer JOIN','Ser siempre correcta','No afectar nada','Eliminar la PK'], a:0,
-      e:'Algunas reglas quedan repartidas entre tablas y cuesta validarlas directamente.' },
-    { t:'keys', q:'Si la PK es un UUID generado en el cliente, ¿qué inconveniente puede haber?',
-      o:['Índices más grandes y fragmentación por ser valores aleatorios','No se puede usar en ningún motor','Impide las FK','Obliga a usar números negativos'], a:0,
-      e:'Los valores aleatorios dispersan las inserciones en el índice.' },
-    { t:'keys', q:'En una relación muchos a muchos, ¿qué se necesita en el modelo relacional?',
-      o:['Una tabla intermedia con las FK de ambas tablas','Una FK en cada tabla con la misma columna','Eliminar las PK','Una vista sin datos'], a:0,
-      e:'La tabla intermedia guarda una fila por cada pareja relacionada.' },
-    { t:'keys', q:'¿Qué ocurre con una FK con ON DELETE CASCADE al borrar la fila padre?',
-      o:['Se borran automáticamente las filas hijas que la referencian','La fila hija se conserva con FK nula siempre','La operación falla siempre','Se crea una copia del padre'], a:0,
-      e:'CASCADE propaga el borrado a las filas hijas.' },
-    { t:'keys', q:'¿Por qué se dice que una FK "lógica" no tiene restricción física?',
-      o:['El motor no valida la relación; la aplicación debe garantizarla','No apunta a ninguna tabla','Es una PK disfrazada','Está cifrada'], a:0,
-      e:'Sin restricción en la base, la integridad depende del código de la aplicación.' },
-    { t:'qs', q:'En QuickSQL, ¿cómo se indicaría una PK compuesta de dos columnas?',
-      o:['Marcando pk en cada una de las columnas que la forman','Escribiendo CREATE TABLE','Usando la palabra compound en la tabla','Con un guion bajo en el nombre'], a:0,
-      e:'Cada columna que forma parte de la clave lleva pk.' },
-    { t:'qs', q:'Antes de dibujar relaciones en QuickSQL para evitar redundancia, ¿qué conviene hacer?',
-      o:['Identificar entidades, atributos y dependencias','Crear índices en todas las columnas','Poner todos los datos en una sola tabla','Elegir el color del diagrama'], a:0,
-      e:'Un buen modelo nace de entender qué depende de qué.' },
-    { t:'norm', q:'Una tabla está en 2FN, tiene PK simple (id) y la columna direccion depende de cliente_nombre (no clave). ¿Cuál es el problema?',
-      o:['Dependencia transitiva: viola la 3FN','Dependencia parcial: viola la 2FN','Viola la 1FN','No hay problema'], a:0,
-      e:'cliente_nombre no es clave y determina la dirección: eso es transitiva.' },
-    { t:'keys', q:'¿Qué significa que una FK no tenga restricción física en la base de datos?',
-      o:['Que el motor no valida que el valor exista en la tabla padre','Que no apunta a ninguna tabla','Que es una PK','Que está cifrada'], a:0,
-      e:'Sin restricción en el motor, la aplicación debe validar la relación.' }
+    { t: 'norm', q: 'En la tabla ventas, producto_id es la clave y proveedor determina el país. ¿Qué forma normal se viola?',
+      o: ['1FN', '3FN, por dependencia transitiva', '2FN, porque la clave tiene una columna', 'Ninguna'], a: 1,
+      e: 'producto → proveedor → país: el país depende de un dato que no es clave. También se viola BCNF.',
+      c: `CREATE TABLE ventas (
+  producto_id INT PRIMARY KEY,
+  proveedor VARCHAR(50),
+  pais_proveedor VARCHAR(50)   -- depende de proveedor
+);` },
+
+    { t: 'norm', q: 'En BCNF, todo determinante (lo que decide un dato) debe ser:',
+      o: ['Clave foránea', 'Superclave', 'Nulo', 'Índice'], a: 1,
+      e: 'Una superclave identifica cada fila por sí sola.' },
+
+    { t: 'norm', q: 'Una tabla tiene clave (A, B), y B determina C, que no es clave. ¿Qué pasa?',
+      o: ['Viola 2FN por dependencia parcial', 'Está en 2FN pero no en 3FN', 'Está en BCNF', 'Es correcta'], a: 0,
+      e: 'C depende de B, que es solo una parte de la clave.',
+      c: `CREATE TABLE tabla_x (
+  A INT,
+  B INT,
+  C VARCHAR(50),
+  PRIMARY KEY (A, B)   -- B determina C
+);` },
+
+    { t: 'keys', q: '¿Qué es una clave candidata?',
+      o: ['Una clave mínima que identifica filas; una se elige como PK', 'Cualquier FK', 'Solo columnas vacías', 'Un índice'], a: 0,
+      e: 'Puede haber varias candidatas; la PK es la elegida.' },
+
+    { t: 'keys', q: '¿Por qué una PK compuesta complica las FK de otras tablas?',
+      o: ['Hay que copiar varias columnas en la tabla hija', 'El motor no la permite', 'Ocupa menos espacio', 'Impide crear índices'], a: 0,
+      e: 'Cada tabla que la referencia debe guardar todas sus columnas.',
+      c: `CREATE TABLE detalle (
+  pedido_id INT,
+  linea_id INT,
+  PRIMARY KEY (pedido_id, linea_id)
+);` },
+
+    { t: 'keys', q: 'Una tabla de pagos tiene un id autoincremental y un CURP único. ¿Qué diseño es correcto?',
+      o: ['id como PK y CURP con UNIQUE', 'CURP como PK sin UNIQUE', 'Eliminar ambos campos', 'CURP como FK hacia la misma tabla'], a: 0,
+      e: 'El ID estable es la PK; el CURP se protege con UNIQUE.',
+      c: `CREATE TABLE pagos (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  curp CHAR(18) UNIQUE,
+  monto DECIMAL(10,2)
+);` },
+
+    { t: 'qs', q: 'En QuickSQL, ¿cómo se define una tabla?',
+      o: ['Con el nombre, una línea de guiones -- y luego las columnas', 'Con CREATE TABLE nombre', 'Con las etiquetas <table>', 'Con nombre: { }'], a: 0,
+      e: 'Primero el nombre, luego -- y debajo cada columna con su tipo.',
+      c: `usuarios
+--
+id int pk
+nombre varchar` },
+
+    { t: 'qs', q: 'Al procesar un diagrama en QuickSQL, ¿qué obtienes normalmente?',
+      o: ['Un diagrama y el script SQL de creación de tablas', 'Solo datos de prueba', 'Una API REST', 'Un PDF de ventas'], a: 0,
+      e: 'QuickSQL dibuja el modelo y puede generar el SQL.' },
+
+    { t: 'norm', q: 'Una tabla tiene clave (A, B, C), y A determina D. ¿Qué forma normal se viola?',
+      o: ['2FN, por dependencia parcial', '1FN', '3FN, por transitiva', 'BCNF no aplica'], a: 0,
+      e: 'A es solo una parte de la clave, así que D depende parcialmente de ella.',
+      c: `CREATE TABLE tabla_y (
+  A INT,
+  B INT,
+  C INT,
+  D VARCHAR(50),
+  PRIMARY KEY (A, B, C)   -- A determina D
+);` },
+
+    { t: 'norm', q: 'Una tabla está en 3FN pero no en BCNF. ¿Qué la caracteriza?',
+      o: ['Un determinante no es superclave, pero su columna dependiente forma parte de una clave', 'Tiene nulos', 'Tiene claves foráneas', 'Tiene una PK simple'], a: 0,
+      e: 'La 3FN tolera este caso porque la columna dependiente es parte de una clave candidata.' },
+
+    { t: 'norm', q: 'Una descomposición sin pérdida significa que:',
+      o: ['Al volver a unir las tablas se recupera toda la información', 'No gasta espacio', 'Elimina duplicados', 'No tiene FK'], a: 0,
+      e: 'Ningún dato se pierde al separar y unir.' },
+
+    { t: 'norm', q: 'Una descomposición que no preserva dependencias:',
+      o: ['Hace difícil validar algunas reglas sin hacer JOIN', 'Siempre es correcta', 'No afecta nada', 'Elimina la PK'], a: 0,
+      e: 'Algunas reglas quedan repartidas entre tablas.' },
+
+    { t: 'keys', q: 'Si la PK es un UUID generado en el cliente, ¿qué inconveniente puede haber?',
+      o: ['Índices más grandes y dispersos', 'No funciona', 'Impide las FK', 'Obliga a usar negativos'], a: 0,
+      e: 'Los valores aleatorios dispersan las inserciones en el índice.' },
+
+    { t: 'keys', q: 'En una relación muchos a muchos, ¿qué se necesita en el modelo relacional?',
+      o: ['Una tabla intermedia con las dos FK', 'Una FK repetida en cada tabla', 'Quitar las PK', 'Una vista'], a: 0,
+      e: 'La tabla intermedia guarda una fila por cada pareja relacionada.' },
+
+    { t: 'keys', q: 'Una FK tiene ON DELETE CASCADE. Al borrar la fila padre:',
+      o: ['Se borran las filas hijas que la referencian', 'Las hijas quedan con FK nula siempre', 'La operación falla siempre', 'Se copia el padre'], a: 0,
+      e: 'CASCADE propaga el borrado a las filas que dependen del padre.' },
+
+    { t: 'keys', q: '¿Qué significa que una FK no tenga restricción física en la base?',
+      o: ['El motor no valida la relación; la aplicación debe hacerlo', 'No apunta a ninguna tabla', 'Es una PK', 'Está cifrada'], a: 0,
+      e: 'Sin restricción, nada impide guardar un valor inexistente.' },
+
+    { t: 'qs', q: 'En QuickSQL, ¿cómo se marca una PK compuesta de dos columnas?',
+      o: ['Con pk en cada columna que la forma', 'Con CREATE TABLE', 'Con la palabra compound', 'Con un guion bajo en el nombre'], a: 0,
+      e: 'Cada columna de la clave lleva pk.' },
+
+    { t: 'qs', q: 'Antes de dibujar relaciones en QuickSQL, ¿qué conviene hacer?',
+      o: ['Identificar qué entidades existen y qué depende de qué', 'Crear índices en todo', 'Poner todo en una sola tabla', 'Elegir el color del diagrama'], a: 0,
+      e: 'Un buen modelo nace de entender los datos y sus dependencias.' },
+
+    { t: 'norm', q: 'Una tabla está en 2FN, tiene id como PK, y la dirección depende de cliente_nombre (no es clave). ¿Cuál es el problema?',
+      o: ['Dependencia transitiva: no cumple 3FN', 'Dependencia parcial: no cumple 2FN', 'No cumple 1FN', 'No hay problema'], a: 0,
+      e: 'cliente_nombre no es clave y determina la dirección: eso es transitiva.',
+      c: `pedidos
+id | cliente_nombre | direccion
+1  | Ana            | Calle 5
+2  | Ana            | Calle 5   ← la dirección depende de cliente_nombre` },
+
+    { t: 'keys', q: '¿Qué ventaja tiene una PK sintética (un ID) frente a una natural?',
+      o: ['No cambia aunque cambien los datos reales', 'Es más larga', 'Ocupa más espacio', 'Impide las FK'], a: 0,
+      e: 'Un ID estable evita actualizar referencias cuando cambia un dato real.' }
   ]
 };
 
@@ -197,21 +338,21 @@ const THEORY = {
   norm: {
     title: 'Normalización',
     points: [
-      'Objetivo: reducir redundancia y evitar anomalías de inserción, actualización y borrado.',
-      '1FN: valores atómicos y sin grupos repetidos en una celda.',
-      '2FN: cumple 1FN y ningún atributo no clave depende de una parte de una PK compuesta.',
-      '3FN: cumple 2FN y no hay dependencias transitivas (no clave → no clave).',
-      'BCNF: toda dependencia funcional parte de una superclave. Es más estricta que la 3FN.'
+      'Objetivo: guardar cada dato una sola vez para evitar errores al cambiar, insertar o borrar.',
+      '1FN: cada celda tiene un solo valor.',
+      '2FN: cada dato depende de toda la clave, no solo de una parte.',
+      '3FN: cada dato depende directamente de la clave, no de otro dato que no es clave.',
+      'BCNF: versión más estricta de la 3FN; todo lo que decide un dato debe ser una superclave.'
     ]
   },
   keys: {
     title: 'Tipos de claves',
     points: [
-      'Superclave: conjunto de columnas que identifica cada fila (puede tener columnas de sobra).',
-      'Clave candidata: superclave mínima. Una de ellas se elige como PK.',
-      'Clave natural: dato del mundo real (CURP, RFC, correo). Puede cambiar.',
-      'Clave ID o surrogada: número o UUID sin significado de negocio. Es estable.',
-      'FK: columna que referencia la PK de otra tabla y garantiza integridad referencial.'
+      'Clave candidata: columnas mínimas que identifican cada fila. Una se elige como PK.',
+      'Clave natural: dato real (CURP, correo). Puede cambiar.',
+      'Clave ID o surrogada: número o UUID sin significado real. Es estable.',
+      'FK: columna que apunta a la PK de otra tabla; mantiene la relación válida.',
+      'Clave compuesta: varias columnas juntas identifican una fila.'
     ]
   },
   qs: {
